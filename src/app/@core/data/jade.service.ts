@@ -26,7 +26,9 @@ export class JadeService {
   private cur_chat: string = '';
   private cur_chatroom: string = '';
 
-  // database  
+  // database
+  private db_users = TAFFY();
+
   private db_buddies = TAFFY();
   private db_chats = TAFFY();
   private db_calls = TAFFY();
@@ -43,22 +45,19 @@ export class JadeService {
 
   init(): Observable<boolean> {
 
-    let observable = Observable.create(observer => {
+    const observable = Observable.create(observer => {
       this.htp_get_info().subscribe(
         data => {
           console.log(data);
           this.info = data.result;
-          
+
           // keep the init order.
           this.init_websock();
 
-          this.init_buddy();
-          this.init_chat();
-          this.init_call();
-          this.init_contact();
-    
+          // this.init_users();
+
           observer.next(true);
-          observer.complete();    
+          observer.complete();
         }
       )      
     });
@@ -100,273 +99,27 @@ export class JadeService {
     .subscribe(
       data => {
         console.log(data);
-      }
+      },
     );
 
   }
 
-  get_my_uuid() {
-    return this.info.uuid;
-  }
-
-  get_curchat() {
-    return this.cur_chat;
-  }
-
-  get_curchatroom() {
-    return this.cur_chatroom;
-  }
-
-  get_contact() {
-    return this.contacts;
-  }
-
-  get_buddies() {
-    return this.db_buddies;
-  }
-
-  get_chats() {
-    return this.db_chats;
-  }
-
-  get_calls() {
-    return this.db_calls;
-  }
-
-  get_sipcalls() {
-    return this.db_sipcalls;
-  }
-
-  get_chat(uuid: string) {
-    console.log('get_chat: ' + uuid);
-    const res = this.db_chats({uuid: uuid}).first();
-    const j_res = JSON.stringify(res);
-
-    return JSON.parse(j_res);
-  }
-
-  get_chatroom_messages(uuid: string) {
-    return this.messages[uuid];
-  }
-
-  get_messges_more(uuid: string, timestamp: string, count: number) {
-
-  }
-
-  get_search() {
-    return this.db_search;
-  }
-
-  send_chatmessage(message: string) {
-    const url = this.baseUrl + '/me/chats/' + this.cur_chat + '/messages?authtoken=' + this.authtoken;
-    console.log('url: ' + url);
-
-    const data = {message: message};
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.post<any>(url, JSON.stringify(data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('send_message'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  send_search(filter: string, type: string) {
-    const url = this.baseUrl + '/me/search' + '?authtoken=' + this.authtoken + '&filter=' + filter + '&type=' + type;
-
-    // clear search db
-    this.db_search().remove();
-
+  private init_users() {
+    const url = this.baseUrl + '/manager/users?authtoken=' + this.authtoken;
+    
     this.http.get<any>(url)
     .pipe(
       map(data => data),
-      catchError(this.handleError('get_call'))
+      catchError(this.handleError('init_users', [])),
     )
     .subscribe(
       data => {
         console.log(data);
-
-        const data_list = data.result.list;
-        for(let i = 0; i <data_list.length; i++) {
-          this.db_search.insert(data_list[i]);
+        const list = data.result.list;
+        for(let i = 0; i < list.length; i++) {
+          this.db_users.insert(list[i]);
         }
-      }
-    );
-  }
-
-  send_call(destination: string, type: string) {
-    const url = this.baseUrl + '/me/calls?authtoken=' + this.authtoken;
-
-    const j_data = {
-      destination_type: type,
-      destination: destination
-    }
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.post<any>(url, JSON.stringify(j_data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('add_buddy'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  add_buddy(uuid: string, name: string=null, detail: string=null) {
-    const url = this.baseUrl + '/me/buddies?authtoken=' + this.authtoken;
-
-    const data = {uuid_user: uuid};
-    if(name != null) {
-      data['name'] = name;
-    }
-    if(detail != null) {
-      data['detail'] = detail;
-    }
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.post<any>(url, JSON.stringify(data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('add_buddy'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  update_buddy(uuid: string, data: any) {
-    const url = this.baseUrl + '/me/buddies/' + uuid + '?authtoken=' + this.authtoken;
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.put<any>(url, JSON.stringify(data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('update_buddy'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  delete_buddy(uuid: string) {
-    const url = this.baseUrl + '/me/buddies/' + uuid + '?authtoken=' + this.authtoken;
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.delete<any>(url, httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('delete_buddy'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  delete_chat(uuid: string) {
-    const url = this.baseUrl + '/me/chats/' + uuid + '?authtoken=' + this.authtoken;
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.delete<any>(url, httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('delete_chat'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  update_chat(uuid: string, data: any) {
-    const url = this.baseUrl + '/me/chats/' + uuid + '?authtoken=' + this.authtoken;
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.put<any>(url, JSON.stringify(data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('update_chat'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  add_sipcall(call) {
-    this.db_sipcalls.insert(call);
-  }
-
-  add_chat(name: string, detail: string, type: number, members: any) {
-    const url = this.baseUrl + '/me/chats?authtoken=' + this.authtoken;
-
-    const j_data = {
-      name: name,
-      detail: detail,
-      type: type,
-      members: members
-    };
-
-    const httpOptions = {
-      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-    };    
-
-    this.http.post<any>(url, JSON.stringify(j_data), httpOptions)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError<any>('add_chat'))
-    )
-    .subscribe(
-      data => {
-        console.log(data);
-      }
-    );
-  }
-
-  private init_chatmessage(uuid:string, uuid_room: string) {
-    console.log('init_chatmessage. uuid: ' + uuid + ', room_uuid: ' + uuid_room);
-    this.htp_get_chatmessages(uuid).subscribe(
-      data => {
-        console.log(data);
-        const message_list = data.result.list;
-        for(let j = 0; j < message_list.length; j++) {
-          this.messages[uuid_room].insert(message_list[j]);
-        }
-      }
+      },
     );
   }
 
@@ -375,54 +128,8 @@ export class JadeService {
       data => {
         console.log(data);
         this.info = data.result;
-      }
+      },
     )
-  }
-
-  private init_buddy() {
-    this.htp_get_buddy().subscribe(
-      data => {
-        console.log(data);
-        const list = data.result.list;
-        for(let i = 0; i < list.length; i++) {
-          this.db_buddies.insert(list[i]);
-        }
-      }
-    );
-  }
-
-  private init_chat() {
-    this.htp_get_chat().subscribe(
-      data => {
-        console.log(data);
-        const list = data.result.list;
-        for(let i = 0; i < list.length; i++) {          
-          
-          const uuid = list[i].uuid;
-          this.db_chats.insert(list[i]);
-        
-          const uuid_room = list[i].room.uuid;
-          
-          // set message db
-          this.create_message_db(uuid_room);
-
-          // init message db
-          this.init_chatmessage(uuid, uuid_room);
-        }
-      }
-    );
-  }
-
-  private init_call() {
-    this.htp_get_call().subscribe(
-      data => {
-        console.log(data);
-        const list = data.result.list;
-        for(let i = 0; i < list.length; i++) {          
-          this.db_calls.insert(list[i]);
-        }
-      }
-    );
   }
 
   private init_websock() {
@@ -448,21 +155,6 @@ export class JadeService {
           this.message_handler(j_msg);
       },
       {autoApply: false},
-    );
-  }
-
-  private init_contact() {
-    console.log('Fired init_contact.');
-
-    this.htp_get_contact().subscribe(
-      data => {
-        console.log(data);
-
-        this.contacts = data.result.list;
-
-        // sip login
-        this.sipService.init(this.db_sipcalls, this.contacts[0].info.id, this.contacts[0].info.password);
-      }
     );
   }
 
