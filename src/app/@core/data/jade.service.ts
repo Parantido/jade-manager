@@ -7,9 +7,8 @@ import { Router } from '@angular/router';
 
 import * as TAFFY from 'taffy';
 // import * as io from 'socket.io-client';
-import {$WebSocket, WebSocketSendMode} from 'angular2-websocket/angular2-websocket';
 
-import { SipService } from './sip.service';
+import {$WebSocket, WebSocketSendMode} from 'angular2-websocket/angular2-websocket';
 
 @Injectable()
 export class JadeService {
@@ -29,13 +28,7 @@ export class JadeService {
   // database
   private db_users = TAFFY();
 
-  private db_buddies = TAFFY();
-  private db_chats = TAFFY();
-  private db_calls = TAFFY();
-  private db_sipcalls = TAFFY();
-  private db_search = TAFFY();
-
-  constructor(private http: HttpClient, private sipService: SipService, private route: Router, private injector:Injector) {
+  constructor(private http: HttpClient, private route: Router, private injector:Injector) {
     console.log("Fired jade.service.");
 
     if(this.authtoken === '') {
@@ -54,12 +47,12 @@ export class JadeService {
           // keep the init order.
           this.init_websock();
 
-          // this.init_users();
+          this.init_users();
 
           observer.next(true);
           observer.complete();
-        }
-      )      
+        },
+      )
     });
     
     return observable;
@@ -83,9 +76,68 @@ export class JadeService {
   get_info() {
     return this.info;
   }
+  get_users() {
+    return this.db_users;
+  }
+
+  update_user(uuid: string, data: any) {
+    const url = this.baseUrl + '/manager/users/' + uuid + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.put<any>(url, JSON.stringify(data), httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('update_info')),
+    )
+    .subscribe(
+      res => {
+        console.log(res);
+      },
+    );
+  }
+
+  delete_user(uuid: string) {
+    const url = this.baseUrl + '/manager/users/' + uuid + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.delete<any>(url, httpOptions)
+      .pipe(
+        map(res => res),
+        catchError(this.handleError<any>('delete_user')),
+      )
+      .subscribe(
+        res => {
+          console.log(res);
+        },
+      );
+  }
+
+  create_user(data: any) {
+    const url = this.baseUrl + '/manager/users?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.post<any>(url, data, httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('create_user')),
+    ).subscribe(
+      res => {
+        console.log(res);
+      },
+    );
+  }
 
   update_info(data: any) {
-    const url = this.baseUrl + '/me/info?authtoken=' + this.authtoken;
+    const url = this.baseUrl + '/manager/info?authtoken=' + this.authtoken;
 
     const httpOptions = {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -101,7 +153,6 @@ export class JadeService {
         console.log(data);
       },
     );
-
   }
 
   private init_users() {
@@ -178,18 +229,6 @@ export class JadeService {
     );
   }
 
-  private create_message_db(uuid_room: string) {
-    if(this.messages[uuid_room] == null) {
-      console.log("Create message db. " + uuid_room);
-      let db_messages = TAFFY();
-      this.messages[uuid_room] = db_messages;
-    }
-  }
-
-  private delete_message_db(uuid_room: string) {
-    delete this.messages[uuid_room];
-  }
-
   /**
    * Login
    */
@@ -201,15 +240,15 @@ export class JadeService {
 
     const httpOptions = {headers: headers};
 
-    return this.http.post<any>(this.baseUrl + '/me/login', null, httpOptions)
+    return this.http.post<any>(this.baseUrl + '/manager/login', null, httpOptions)
       .pipe(
-        map(data => data),
-        catchError(this.handleError<any>('login'))
+        map(res => res),
+        catchError(this.handleError<any>('login')),
       );
   }
 
   logout() {
-    const url = this.baseUrl + '/me/login?authtoken=' + this.authtoken;
+    const url = this.baseUrl + '/manager/login?authtoken=' + this.authtoken;
 
     const httpOptions = {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -224,61 +263,17 @@ export class JadeService {
         data => {
           console.log(data);
           this.authtoken = '';
-        }
+        },
       );
 
   }
   
   private htp_get_info(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/me/info?authtoken=' + this.authtoken)
+    return this.http.get<any>(this.baseUrl + '/manager/info?authtoken=' + this.authtoken)
     .pipe(
       map(data => data),
-      catchError(this.handleError('htp_get_info', []))
+      catchError(this.handleError('htp_get_info', [])),
     );
-  }
-
-  /**
-   * Get buddies info
-   */
-  private htp_get_buddy(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/me/buddies?authtoken=' + this.authtoken)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError('get_buddy', []))
-    );    
-  }
-
-  /**
-   * Get chats info
-   */
-  private htp_get_chat(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/me/chats?authtoken=' + this.authtoken)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError('get_chat'))
-    )
-  }
-
-  /**
-   * Get calls info
-   */
-  private htp_get_call(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/me/calls?authtoken=' + this.authtoken)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError('get_call'))
-    )
-  }
-
-  /**
-   * Get contacts info
-   */
-  private htp_get_contact(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + '/me/contacts?authtoken=' + this.authtoken)
-    .pipe(
-      map(data => data),
-      catchError(this.handleError('get_contact'))
-    )
   }
 
   /**
@@ -314,29 +309,8 @@ export class JadeService {
     const type = Object.keys(j_data)[0];
     const j_msg = j_data[type];
 
-    if(type === 'me.chats.message.create') {
-      this.message_handler_me_chats_message_create(j_msg);
-    }
-    else if(type === 'me.buddies.create') {
-      this.message_handler_me_buddies_create(j_msg);
-    }
-    else if(type === 'me.buddies.delete') {
-      this.message_handler_me_buddies_delete(j_msg);
-    }
-    else if(type === 'me.buddies.update') {
-      this.message_handler_me_buddies_update(j_msg);
-    }
-    else if(type === 'me.chats.create') {
-      this.message_handler_me_chats_room_create(j_msg);
-    }
-    else if(type === 'me.chats.update') {
-      this.message_handler_me_chats_room_update(j_msg);
-    }
-    else if(type === 'me.chats.delete') {
-      this.message_handler_me_chats_room_delete(j_msg);
-    }
-    else if(type === 'me.info.update') {
-      this.message_handler_me_info_update(j_msg);
+    if(type === 'manager.info.update') {
+      this.message_handler_manager_info_update(j_msg);
     }
     else {
       console.error("Could not find correct message handler.");
@@ -344,50 +318,9 @@ export class JadeService {
 
   }
 
-  private message_handler_me_chats_message_create(j_msg: any) {
-    const room_uuid = j_msg['uuid_room'];
-    if(room_uuid == '') {
-      return;
-    }
-    this.messages[room_uuid].insert(j_msg);
-  }
+  private message_handler_manager_info_update(j_msg: any) {
 
-  private message_handler_me_buddies_create(j_msg: any) {
-    this.db_buddies.insert(j_msg);
-  }
-
-  private message_handler_me_buddies_delete(j_msg: any) {
-    const uuid = j_msg['uuid'];
-    this.db_buddies({uuid: uuid}).remove();
-  }
-
-  private message_handler_me_buddies_update(j_msg: any) {
-    const uuid = j_msg['uuid'];
-    this.db_buddies({uuid: uuid}).update(j_msg);
-  }
-
-  private message_handler_me_chats_room_create(j_msg: any) {
-    this.db_chats.insert(j_msg);
-    this.create_message_db(j_msg.room.uuid);
-    console.log("Create chat room. " + j_msg.room.uuid);
-  }
-
-  private message_handler_me_chats_room_update(j_msg: any) {
-    const uuid = j_msg['uuid'];
-    this.db_chats({uuid: uuid}).update(j_msg);
-  }
-
-  private message_handler_me_chats_room_delete(j_msg: any) {
-    const uuid = j_msg['uuid'];
-    this.db_chats({uuid: uuid}).remove(j_msg);
-    this.delete_message_db(j_msg.room.uuid);
-
-    console.log("Delete chat room. " + j_msg.room.uuid);
-  }
-
-  private message_handler_me_info_update(j_msg: any) {
-
-    for(var k in j_msg) {
+    for(const k in j_msg) {
       this.info[k] = j_msg[k];
     }
     console.log('Updated info. ' + this.info.name);

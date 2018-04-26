@@ -3,12 +3,10 @@ import { CommonModule } from '@angular/common';
 
 import { StateService } from './state.service';
 import { JadeService } from './jade.service';
-import { SipService } from './sip.service';
 
 const SERVICES = [
   StateService,
   JadeService,
-  SipService,
 ];
 
 @NgModule({

@@ -20,8 +20,8 @@ const routes: Routes = [
       {
         path: '',
         component: LogoutComponent,
-      }
-    ]
+      },
+    ],
   },
   { path: '', redirectTo: 'pages', pathMatch: 'full' },
   { path: '**', redirectTo: 'pages' },

@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 import { JadeService } from '../@core/data/jade.service';
 
 @Component({
-  selector: 'login',
+  selector: 'jade-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit {
   
@@ -28,17 +28,20 @@ export class LoginComponent implements OnInit {
 
         // get info
         this.jService.init().subscribe(
-          res => {
-            if(res != true) {
+          data => {
+            if(data !== true) {
               console.log("Could not login correctly.");
               return;
             }
+
+            console.log("Logged in.");
             
-            // move to main page
+            // // move to main page
+            // this.route.navigateByUrl('/');
             this.route.navigate(['/']);
-          }
+          },
         );
-      }
+      },
     );
   }
 }
