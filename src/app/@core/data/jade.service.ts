@@ -312,6 +312,15 @@ export class JadeService {
     if(type === 'manager.info.update') {
       this.message_handler_manager_info_update(j_msg);
     }
+    else if(type === "manager.user.create") {
+      this.message_handler_manager_user_create(j_msg);
+    }
+    else if(type === "manager.user.update") {
+      this.message_handler_manager_user_update(j_msg);
+    }
+    else if(type === "manager.user.delete") {
+      this.message_handler_manager_user_delete(j_msg);
+    }
     else {
       console.error("Could not find correct message handler.");
     }
@@ -324,6 +333,20 @@ export class JadeService {
       this.info[k] = j_msg[k];
     }
     console.log('Updated info. ' + this.info.name);
+  }
+
+  private message_handler_manager_user_create(j_msg: any) {
+    this.db_users.insert(j_msg);
+  }
+
+  private message_handler_manager_user_update(j_msg: any) {
+    const uuid = j_msg['uuid'];
+    this.db_users({uuid: uuid}).update(j_msg);
+  }
+
+  private message_handler_manager_user_delete(j_msg: any) {
+    const uuid = j_msg['uuid'];
+    this.db_users({uuid: uuid}).remove();
   }
 
 
