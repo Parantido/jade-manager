@@ -1,0 +1,178 @@
+<nb-card>
+  <nb-card-header>
+  Trunks
+  </nb-card-header>
+  <nb-card-body>
+    <ng2-smart-table
+      [settings]="settings"
+      [source]="source"
+      (deleteConfirm)="onDeleteConfirm($event)"
+      (rowSelect)="onRowSelect($event)"
+    >
+    </ng2-smart-table>  
+  </nb-card-body>
+</nb-card>
+
+<nb-card>
+  <nb-tabset>
+
+    <nb-tab tabTitle="Detail">
+
+      <nb-card-body>
+            
+        <div class="row">
+            
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" [(ngModel)]="detail.name" class="form-control" id="name" placeholder="Name">
+            </div>
+          </div>
+          
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="status">Status</label>
+              <input type="text" readonly="true" [(ngModel)]="detail.status" class="form-control" id="status" placeholder="Status">
+            </div>
+          </div>
+        
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="hostname">Hostname</label>
+              <input type="text" [(ngModel)]="detail.hostname" class="form-control" id="hostname" placeholder="Hostname">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" [(ngModel)]="detail.username" class="form-control" id="username" placeholder="Username">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="text" [(ngModel)]="detail.password" class="form-control" id="password" placeholder="Password">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="context">Context</label>
+              <input type="text" [(ngModel)]="detail.context" class="form-control" id="context" placeholder="Context">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="server_uri">Server uri</label>
+              <input type="text" [(ngModel)]="detail.server_uri" class="form-control" id="server_uri" placeholder="Server uri">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="client_uri">Client uri</label>
+              <input type="text" [(ngModel)]="detail.client_uri" class="form-control" id="client_uri" placeholder="Client uri">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="contact">Contact</label>
+              <input type="text" [(ngModel)]="detail.contact" class="form-control" id="contact" placeholder="Contact">
+            </div>
+          </div>
+
+
+        </div>
+        
+        <nb-card-footer>
+          <div class="col-sm-9">
+            <button class="btn btn-success" (click)="update_handler()">Update</button>
+          </div>
+        </nb-card-footer>
+
+      </nb-card-body>
+
+    </nb-tab>
+
+
+
+    <nb-tab tabTitle="Create">
+
+      <nb-card-body>
+            
+        <div class="row">
+            
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" [(ngModel)]="detail_create.name" class="form-control" id="name" placeholder="Name">
+            </div>
+          </div>
+                  
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="hostname">Hostname</label>
+              <input type="text" [(ngModel)]="detail_create.hostname" class="form-control" id="hostname" placeholder="Hostname">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" [(ngModel)]="detail_create.username" class="form-control" id="username" placeholder="Username">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="text" [(ngModel)]="detail_create.password" class="form-control" id="password" placeholder="Password">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="context">Context</label>
+              <input type="text" [(ngModel)]="detail_create.context" class="form-control" id="context" placeholder="Context">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="server_uri">Server uri</label>
+              <input type="text" [(ngModel)]="detail_create.server_uri" class="form-control" id="server_uri" placeholder="Server uri">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="client_uri">Client uri</label>
+              <input type="text" [(ngModel)]="detail_create.client_uri" class="form-control" id="client_uri" placeholder="Client uri">
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="contact">Contact</label>
+              <input type="text" [(ngModel)]="detail_create.contact" class="form-control" id="contact" placeholder="Contact">
+            </div>
+          </div>
+
+        </div>
+        
+        <nb-card-footer>
+          <div class="col-sm-9">
+            <button class="btn btn-success" (click)="create_handler()">Create</button>
+          </div>
+        </nb-card-footer>
+
+      </nb-card-body>
+
+    </nb-tab>
+
+  </nb-tabset>
+</nb-card>

@@ -5,6 +5,7 @@ import { PagesRoutingModule } from './pages-routing.module';
 import { ThemeModule } from '../@theme/theme.module';
 import { SettingComponent } from './setting/setting.component';
 import { UserComponent } from './user/user.component';
+import { TrunkComponent } from './trunk/trunk.component';
 
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 
@@ -22,6 +23,7 @@ const PAGES_COMPONENTS = [
   declarations: [
     ...PAGES_COMPONENTS,
     UserComponent,
+    TrunkComponent,
     SettingComponent,
   ],
   providers: [

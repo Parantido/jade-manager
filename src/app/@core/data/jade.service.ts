@@ -27,6 +27,7 @@ export class JadeService {
 
   // database
   private db_users = TAFFY();
+  private db_trunks = TAFFY();
 
   constructor(private http: HttpClient, private route: Router, private injector:Injector) {
     console.log("Fired jade.service.");
@@ -48,6 +49,7 @@ export class JadeService {
           this.init_websock();
 
           this.init_users();
+          this.init_trunks();
 
           observer.next(true);
           observer.complete();
@@ -78,6 +80,9 @@ export class JadeService {
   }
   get_users() {
     return this.db_users;
+  }
+  get_trunks() {
+    return this.db_trunks;
   }
 
   update_user(uuid: string, data: any) {
@@ -155,6 +160,62 @@ export class JadeService {
     );
   }
 
+  update_trunk(name: string, data: any) {
+    const url = this.baseUrl + '/manager/trunks/' + encodeURI(name) + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.put<any>(url, JSON.stringify(data), httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('update_trunk')),
+    )
+    .subscribe(
+      res => {
+        console.log(res);
+      },
+    );
+  }
+
+  delete_trunk(name: string) {
+    const url = this.baseUrl + '/manager/trunks/' + encodeURI(name) + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.delete<any>(url, httpOptions)
+      .pipe(
+        map(res => res),
+        catchError(this.handleError<any>('delete_trunk')),
+      )
+      .subscribe(
+        res => {
+          console.log(res);
+        },
+      );
+  }
+
+  create_trunk(data: any) {
+    const url = this.baseUrl + '/manager/trunks?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.post<any>(url, data, httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('create_trunk')),
+    ).subscribe(
+      res => {
+        console.log(res);
+      },
+    );
+  }
+
   private init_users() {
     const url = this.baseUrl + '/manager/users?authtoken=' + this.authtoken;
     
@@ -169,6 +230,27 @@ export class JadeService {
         const list = data.result.list;
         for(let i = 0; i < list.length; i++) {
           this.db_users.insert(list[i]);
+        }
+      },
+    );
+  }
+
+  private init_trunks() {
+    const url = this.baseUrl + '/manager/trunks?authtoken=' + this.authtoken;
+    
+    this.http.get<any>(url)
+    .pipe(
+      map(data => data),
+      catchError(this.handleError('init_trunks', [])),
+    )
+    .subscribe(
+      data => {
+        this.db_trunks().remove();
+
+        console.log(data);
+        const list = data.result.list;
+        for(let i = 0; i < list.length; i++) {
+          this.db_trunks.insert(list[i]);
         }
       },
     );
@@ -312,6 +394,12 @@ export class JadeService {
     if(type === 'manager.info.update') {
       this.message_handler_manager_info_update(j_msg);
     }
+    else if(type === "manager.notice.create") {
+      this.message_handler_manager_notice_create(j_msg);
+    }
+    else if(type === "manager.trunk.update") {
+
+    }
     else if(type === "manager.user.create") {
       this.message_handler_manager_user_create(j_msg);
     }
@@ -325,6 +413,24 @@ export class JadeService {
       console.error("Could not find correct message handler.");
     }
 
+  }
+
+  private message_handler_manager_notice_create(j_msg: any) {
+    
+    const type = j_msg.type;
+    console.log("Fired message_handler_manager_notice_create. type: " + type);
+
+    if(type === 'reload') {
+      for(let i = 0; i < j_msg.modules.length; i++) {
+        const module = j_msg.modules[i];
+        console.log("Check value. name: " + module.name);
+
+        if(module.name === 'trunk') {
+          // reload trunk
+          this.init_trunks();
+        }
+      }
+    }
   }
 
   private message_handler_manager_info_update(j_msg: any) {
@@ -347,6 +453,11 @@ export class JadeService {
   private message_handler_manager_user_delete(j_msg: any) {
     const uuid = j_msg['uuid'];
     this.db_users({uuid: uuid}).remove();
+  }
+
+  private message_handler_manager_trunk_update(j_msg: any) {
+    const name = j_msg['name'];
+    this.db_trunks({name: name}).update(j_msg);
   }
 
 

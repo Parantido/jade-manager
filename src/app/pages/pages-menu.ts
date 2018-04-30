@@ -8,6 +8,12 @@ export const MENU_ITEMS: NbMenuItem[] = [
     home: true,
   },
   {
+    title: 'Trunk',
+    icon: 'fa fa-exchange',
+    link: '/pages/trunk',
+    home: false,
+  },
+  {
     title: 'Setting',
     icon: 'fa fa-cog',
     link: '/pages/setting',
