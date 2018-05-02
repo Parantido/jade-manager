@@ -5,6 +5,7 @@ import { PagesComponent } from './pages.component';
 import { SettingComponent } from './setting/setting.component';
 import { UserComponent } from './user/user.component';
 import { TrunkComponent } from './trunk/trunk.component';
+import { SdpComponent } from './sdp/sdp.component';
 
 const routes: Routes = [{
   path: '',
@@ -17,6 +18,10 @@ const routes: Routes = [{
     {
       path: 'trunk',
       component: TrunkComponent,
+    },
+    {
+      path: 'sdp',
+      component: SdpComponent,
     },
     {
       path: 'setting',

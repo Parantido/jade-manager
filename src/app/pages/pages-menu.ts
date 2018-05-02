@@ -14,6 +14,12 @@ export const MENU_ITEMS: NbMenuItem[] = [
     home: false,
   },
   {
+    title: 'Static Dialplan',
+    icon: 'fa fa-paw',
+    link: '/pages/sdp',
+    home: false,
+  },
+  {
     title: 'Setting',
     icon: 'fa fa-cog',
     link: '/pages/setting',

@@ -28,6 +28,7 @@ export class JadeService {
   // database
   private db_users = TAFFY();
   private db_trunks = TAFFY();
+  private db_sdialplans = TAFFY();
 
   constructor(private http: HttpClient, private route: Router, private injector:Injector) {
     console.log("Fired jade.service.");
@@ -50,6 +51,7 @@ export class JadeService {
 
           this.init_users();
           this.init_trunks();
+          this.init_sdialplans();
 
           observer.next(true);
           observer.complete();
@@ -83,6 +85,9 @@ export class JadeService {
   }
   get_trunks() {
     return this.db_trunks;
+  }
+  get_sdialplans() {
+    return this.db_sdialplans;
   }
 
   update_user(uuid: string, data: any) {
@@ -252,6 +257,90 @@ export class JadeService {
         for(let i = 0; i < list.length; i++) {
           this.db_trunks.insert(list[i]);
         }
+      },
+    );
+  }
+
+  private init_sdialplans() {
+    const url = this.baseUrl + '/manager/sdialplans?authtoken=' + this.authtoken;
+    
+    this.http.get<any>(url)
+    .pipe(
+      map(data => data),
+      catchError(this.handleError('init_trunks', [])),
+    )
+    .subscribe(
+      data => {
+        this.db_sdialplans().remove();
+
+        console.log(data);
+        const list = data.result.list;
+        for(let i = 0; i < list.length; i++) {
+          this.db_sdialplans.insert(list[i]);
+        }
+      },
+    );
+  }
+
+  reload_sdialplan() {
+    this.init_sdialplans();
+  }
+
+  update_sdialplan(name: string, data: any) {
+    const url = this.baseUrl + '/manager/sdialplans/' + encodeURI(name) + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.put<any>(url, JSON.stringify(data), httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('update_sdialplan')),
+    )
+    .subscribe(
+      res => {
+        console.log(res);
+        this.reload_sdialplan();
+      },
+    );
+  }
+
+  delete_sdialplan(name: string) {
+    const url = this.baseUrl + '/manager/sdialplans/' + encodeURI(name) + '?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.delete<any>(url, httpOptions)
+      .pipe(
+        map(res => res),
+        catchError(this.handleError<any>('delete_sdialplan')),
+      )
+      .subscribe(
+        res => {
+          console.log(res);
+          this.reload_sdialplan();
+        },
+      );
+  }
+
+  create_sdialplan(data: any) {
+    const url = this.baseUrl + '/manager/sdialplans?authtoken=' + this.authtoken;
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    };    
+
+    this.http.post<any>(url, data, httpOptions)
+    .pipe(
+      map(res => res),
+      catchError(this.handleError<any>('create_sdialplan')),
+    ).subscribe(
+      res => {
+        console.log(res);
+        this.reload_sdialplan();
       },
     );
   }

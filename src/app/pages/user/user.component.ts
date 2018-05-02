@@ -3,9 +3,9 @@ import { LocalDataSource } from 'ng2-smart-table';
 import { JadeService } from '../../@core/data/jade.service';
 
 @Component({
-  selector: 'jade-user',
+  selector: 'ngx-jade-user',
   templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss']
+  styleUrls: ['./user.component.scss'],
 })
 export class UserComponent implements OnInit {
   source: LocalDataSource = new LocalDataSource();
@@ -36,6 +36,10 @@ export class UserComponent implements OnInit {
       },
       name: {
         title: 'Name',
+        type: 'string',
+      },
+      context: {
+        title: 'Context',
         type: 'string',
       },
     },
