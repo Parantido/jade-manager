@@ -232,12 +232,19 @@ export class JadeService {
     .subscribe(
       data => {
         console.log(data);
+
+        this.db_users().remove();
+
         const list = data.result.list;
         for(let i = 0; i < list.length; i++) {
           this.db_users.insert(list[i]);
         }
       },
     );
+  }
+
+  reload_user() {
+    this.init_users();
   }
 
   private init_trunks() {
@@ -250,15 +257,20 @@ export class JadeService {
     )
     .subscribe(
       data => {
+        console.log(data);
+
         this.db_trunks().remove();
 
-        console.log(data);
         const list = data.result.list;
         for(let i = 0; i < list.length; i++) {
           this.db_trunks.insert(list[i]);
         }
       },
     );
+  }
+
+  reload_trunk() {
+    this.init_trunks();
   }
 
   private init_sdialplans() {
@@ -271,9 +283,10 @@ export class JadeService {
     )
     .subscribe(
       data => {
+        console.log(data);
+        
         this.db_sdialplans().remove();
 
-        console.log(data);
         const list = data.result.list;
         for(let i = 0; i < list.length; i++) {
           this.db_sdialplans.insert(list[i]);
@@ -516,7 +529,11 @@ export class JadeService {
 
         if(module.name === 'trunk') {
           // reload trunk
-          this.init_trunks();
+          this.reload_trunk();
+        }
+        else if(module.name === 'user') {
+          // reload user
+          this.reload_user();
         }
       }
     }
