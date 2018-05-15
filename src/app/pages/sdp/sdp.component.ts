@@ -178,8 +178,6 @@ export class SdpComponent implements OnInit {
         console.log("update data: " + j_data);
 
         this.jService.update_sdialplan(j_data.name, j_data);
-
-        this.jService.reload_sdialplan();
       },
     );
  }
