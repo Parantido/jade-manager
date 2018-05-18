@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
 
   constructor(private sidebarService: NbSidebarService,
               private menuService: NbMenuService,
-              private jService: JadeService
+              private jService: JadeService,
               ) {
   }
 
