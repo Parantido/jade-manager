@@ -9,7 +9,7 @@ import { JadeService } from '../../@core/data/jade.service';
 })
 export class SdpComponent implements OnInit {
   source: LocalDataSource = new LocalDataSource();
-  source_contents: LocalDataSource = new LocalDataSource();
+  source_data: LocalDataSource = new LocalDataSource();
 
   private detail: any;
   private detail_create: any;
@@ -39,7 +39,7 @@ export class SdpComponent implements OnInit {
     },
   }
 
-  private settings_contents = {
+  private settings_data = {
     actions: {
       add: true,
       edit: true,
@@ -69,8 +69,8 @@ export class SdpComponent implements OnInit {
         title: 'Type',
         type: 'string',
       },
-      content: {
-        title: 'Content',
+      data: {
+        title: 'Data',
         type: 'string',
       },
     },
@@ -79,6 +79,9 @@ export class SdpComponent implements OnInit {
   constructor(private jService: JadeService) {
     this.detail = {};
     this.detail_create = {};
+
+
+    this.jService.reload_sdialplan();
 
     // main
     const db = this.jService.get_sdialplans();
@@ -98,25 +101,24 @@ export class SdpComponent implements OnInit {
     delete this.detail.___id;
     delete this.detail.___s;
 
-    this.source_contents.empty();
-    this.source_contents.refresh();
+    this.source_data.empty();
+    this.source_data.refresh();
 
     let seq = 0;
-    for(let i = 0; i < this.detail.contents.length; i++) {
-      const content = this.detail.contents[i];
+    for(let i = 0; i < this.detail.data.length; i++) {
+      const data = this.detail.data[i];
 
-      const type = Object.keys(content)[0];
+      const type = Object.keys(data)[0];
       
       const j_tmp = {
         sequence: seq,
         type: type,
-        content: content[type],
+        data: data[type],
       }
-      // this.source_contents.add(j_tmp);
-      this.source_contents.append(j_tmp);
+      this.source_data.append(j_tmp);
       seq++;
 
-      console.log("Add data. " + seq + ', ' + type + ', ' + content[type]);
+      console.log("Add data. " + seq + ', ' + type + ', ' + data[type]);
     }
   }
 
@@ -124,7 +126,7 @@ export class SdpComponent implements OnInit {
     console.log("Fired onCreateConfirm.");
     const j_data = {
       name: event.newData.name,
-      contents: [],
+      data: [],
     }
 
     this.jService.create_sdialplan(j_data);
@@ -137,47 +139,47 @@ export class SdpComponent implements OnInit {
     }
   }
 
-  private onRowSelectContents(event): void {
+  private onRowSelectData(event): void {
 
   }
 
-  private onCreateConfirmContents(event): void {
-    console.log("Fired onCreateConfirmContents.");
+  private onCreateConfirmData(event): void {
+    console.log("Fired onCreateConfirmData.");
     event.confirm.resolve(event.newData);
         
     console.log("Count: " + event.source.count());    
   }
 
-  private onDeleteConfirmContents(event): void {
+  private onDeleteConfirmData(event): void {
 
   }
 
   private update_handler(): void {
 
-    this.source_contents.setSort([{ field: 'sequence', direction: 'asc' }]);
+    this.source_data.setSort([{ field: 'sequence', direction: 'asc' }]);
 
-    this.source_contents.getElements().then(
+    this.source_data.getElements().then(
       data => {
-        const j_contents = [];
+        const j_data = [];
         for(let i = 0; i < data.length; i++) {
-          const j_tmp = {
+          const j_data_tmp = {
             type: data[i].type,
-            content: data[i].content,
+            data: data[i].data,
           }
 
-          j_contents.push(j_tmp);
+          j_data.push(j_data_tmp);
         }
 
-        console.log(j_contents);
+        console.log(j_data);
 
-        const j_data = {
+        const j_tmp = {
           name: this.detail.name,
-          contents: j_contents,
+          data: j_data,
         }
 
-        console.log("update data: " + j_data);
+        console.log("update data: " + j_tmp);
 
-        this.jService.update_sdialplan(j_data.name, j_data);
+        this.jService.update_sdialplan(j_tmp.name, j_tmp);
       },
     );
  }
@@ -185,7 +187,7 @@ export class SdpComponent implements OnInit {
   private create_handler(): void {
     console.log("Fired create_handler.");
 
-    this.jService.create_trunk(this.detail_create);
+    this.jService.create_sdialplan(this.detail_create);
   }
 
   ngOnInit() {
