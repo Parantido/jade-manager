@@ -12,14 +12,7 @@ $ npm install
 $ npm start
 ```
 
-## Demo
-You can try it at here.
-
-ID: admin
-Password: admin
-
-https://project.pchero21.com/jade-manager/
-
+## Scrrenshot
 [![Screen Preview](./jade-manager.png)](./jade-manager.png)
 
 ## License
